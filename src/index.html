@@ -1,15 +1,232 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
-  <title>Stencil Component Starter</title>
+  <title>CARTO-Stencil Component Starter</title>
+
+  <!-- Include Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+  <link href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" rel="stylesheet">
+  <!-- Include CARTO.js -->
+  <script src="https://cartodb-libs.global.ssl.fastly.net/carto.js/v4.0.2/carto.min.js"></script>
+
+  <!-- Components -->
   <script src="/build/mycomponent.js"></script>
 
-</head>
-<body>
 
+  <!-- Some CARTO.JS useful stuff -->
+  <script>
+    function getBaseMap() {
+      const map = L.map("map").setView([50, 15], 4);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png",
+        {
+          maxZoom: 18
+        }
+      ).addTo(map);
+
+      // Adding Voyager Labels
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png",
+        {
+          maxZoom: 18,
+          zIndex: 10
+        }
+      ).addTo(map);
+      return map;
+    }
+
+    function getEuropeanCountriesLayer() {
+      const europeanCountriesDataset = new carto.source.Dataset(`
+        ne_adm0_europe
+    `);
+      const europeanCountriesStyle = new carto.style.CartoCSS(`
+        #layer {
+            polygon-fill: #162945;
+            polygon-opacity: 0.5;
+            ::outline {
+                line-width: 1;
+                line-color: #FFFFFF;
+                line-opacity: 0.5;
+            }
+        }
+    `);
+      const europeanCountries = new carto.layer.Layer(
+        europeanCountriesDataset,
+        europeanCountriesStyle
+      );
+
+      europeanCountries.getLayerName = () => "European Countries (dataset)";
+
+      return europeanCountries;
+    }
+
+    function getPopulatedPlacesLayer() {
+      const populatedPlacesSource = new carto.source.SQL(`
+        SELECT *
+        FROM ne_10m_populated_places_simple
+        WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
+    `);
+      const populatedPlacesStyle = new carto.style.CartoCSS(`
+        #layer {
+        marker-width: 8;
+        marker-fill: #FF583E;
+        marker-fill-opacity: 0.9;
+        marker-line-width: 0.5;
+        marker-line-color: #FFFFFF;
+        marker-line-opacity: 1;
+        marker-type: ellipse;
+        marker-allow-overlap: false;
+        }
+    `);
+      const populatedPlaces = new carto.layer.Layer(
+        populatedPlacesSource,
+        populatedPlacesStyle,
+        {
+          featureOverColumns: ["name"]
+        }
+      );
+
+      populatedPlaces.on(carto.layer.events.FEATURE_OVER, featureEvent => {
+        popup.setLatLng(featureEvent.latLng);
+        if (!popup.isOpen()) {
+          popup.setContent(featureEvent.data.name);
+          popup.openOn(map);
+        }
+      });
+      populatedPlaces.on(carto.layer.events.FEATURE_OUT, featureEvent => {
+        popup.removeFrom(map);
+      });
+
+      populatedPlaces.getLayerName = () => "Populated places (Query)";
+
+      return populatedPlaces;
+    }
+
+    function getAveragePopulationDataview() {
+      const averagePopulation = new carto.dataview.Formula(
+        populatedPlaces.getSource(),
+        "pop_max",
+        {
+          operation: carto.operation.AVG
+        }
+      );
+      averagePopulation.on("dataChanged", data => {
+        const avgPopulation = data.result;
+        const widgetDom = document.querySelector("#avgPopulationWidget");
+        const averagePopulationDom = widgetDom.querySelector(
+          ".js-average-population"
+        );
+        averagePopulationDom.innerText = Math.floor(avgPopulation);
+      });
+      return averagePopulation;
+    }
+    function getCountriesDataview() {
+      function highlightCountry(admin) {
+        let cartoCSS = `
+        #layer {
+            polygon-fill: #162945;
+            polygon-opacity: 0.5;
+            ::outline {
+            line-width: 1;
+            line-color: #FFFFFF;
+            line-opacity: 0.5;
+            }
+        }
+        `;
+        if (admin) {
+          cartoCSS = `
+            ${cartoCSS}
+            #layer[admin!='${admin}'] {
+            polygon-fill: #CDCDCD;
+            }
+        `;
+        }
+        europeanCountries.getStyle().setContent(cartoCSS);
+      }
+
+      function filterPopulatedPlacesByCountry(admin) {
+        let query = `
+        SELECT *
+            FROM ne_10m_populated_places_simple
+            WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
+        `;
+        if (admin) {
+          query = `
+            SELECT *
+            FROM ne_10m_populated_places_simple
+            WHERE adm0name='${admin}'
+        `;
+        }
+        populatedPlaces.getSource().setQuery(query);
+      }
+
+      const countriesDataview = new carto.dataview.Category(
+        europeanCountries.getSource(),
+        "admin",
+        {
+          limit: 100
+        }
+      );
+      countriesDataview.on("dataChanged", data => {
+        const countryNames = data.categories.map(category => category.name).sort();
+        const widgetDom = document.querySelector("#countriesWidget");
+        const countriesDom = widgetDom.querySelector(".js-countries");
+
+        countriesDom.onchange = event => {
+          const admin = event.target.value;
+          highlightCountry(admin);
+          filterPopulatedPlacesByCountry(admin);
+        };
+
+        // Fill in the list of countries
+        countryNames.forEach(admin => {
+          const option = document.createElement("option");
+          option.innerHTML = admin;
+          option.value = admin;
+          countriesDom.appendChild(option);
+        });
+      });
+      return countriesDataview;
+    }
+  </script>
+</head>
+
+<body>
+  <!-- basic component -->
   <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
 
+  <h1>Some fancy CARTO-Web Components</h1>
+
+  <div id="map"></div>
+
+  <carto-layers id="cdb" get-layer-name="getLayerName"></carto-layers>
+
+  <script>
+    const map = getBaseMap();
+    const popup = L.popup({ closeButton: false });
+
+    const europeanCountries = getEuropeanCountriesLayer();
+    const populatedPlaces = getPopulatedPlacesLayer();
+
+    var client = new carto.Client({
+      apiKey: 'default_public',
+      username: 'victor-carto'
+    });
+
+    // Add Layers to map
+    var layers = [europeanCountries, populatedPlaces];
+    // console.log(layers);
+    client.addLayers(layers);
+
+    // 
+    const cartoLayers = document.querySelector('carto-layers#cdb');
+    cartoLayers.layers = layers;
+
+  </script>
+
 </body>
+
 </html>
