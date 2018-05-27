@@ -1,4 +1,28 @@
-.layers-box {
-  border: 1px red solid;
+.carto-layers-content {
+  border: 2px #ccc solid;
+  box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2);
   padding: 20px;
+  width: 350px;
+  background-color: white;
+  font-family: Roboto, Helvetica, Arial, "sans-serif";
+}
+.carto-layers-header {
+  color: #2c2c2c;
+  font-weight: 400;
+  font-size: 24px;
+}
+
+.carto-layers-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.carto-layers-list li {
+  padding-top: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.carto-layers-list input {
+  margin-right: 10px;
 }
