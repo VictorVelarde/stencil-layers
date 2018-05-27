@@ -9,11 +9,16 @@
   <!-- Include Leaflet -->
   <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
   <link href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" rel="stylesheet">
+
   <!-- Include CARTO.js -->
   <script src="https://cartodb-libs.global.ssl.fastly.net/carto.js/v4.0.2/carto.min.js"></script>
 
+  <!-- Include Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto:300,400,500" rel="stylesheet">
+
   <!-- Components -->
-  <script src="/build/mycomponent.js"></script>
+  <script src="/build/carto-components.js"></script>
+
 
 
   <!-- Some CARTO.JS useful stuff -->
@@ -40,19 +45,19 @@
 
     function getEuropeanCountriesLayer() {
       const europeanCountriesDataset = new carto.source.Dataset(`
-        ne_adm0_europe
-    `);
+          ne_adm0_europe
+      `);
       const europeanCountriesStyle = new carto.style.CartoCSS(`
-        #layer {
-            polygon-fill: #162945;
-            polygon-opacity: 0.5;
-            ::outline {
-                line-width: 1;
-                line-color: #FFFFFF;
-                line-opacity: 0.5;
-            }
-        }
-    `);
+          #layer {
+              polygon-fill: #162945;
+              polygon-opacity: 0.5;
+              ::outline {
+                  line-width: 1;
+                  line-color: #FFFFFF;
+                  line-opacity: 0.5;
+              }
+          }
+      `);
       const europeanCountries = new carto.layer.Layer(
         europeanCountriesDataset,
         europeanCountriesStyle
@@ -65,22 +70,22 @@
 
     function getPopulatedPlacesLayer() {
       const populatedPlacesSource = new carto.source.SQL(`
-        SELECT *
-        FROM ne_10m_populated_places_simple
-        WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
-    `);
+          SELECT *
+          FROM ne_10m_populated_places_simple
+          WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
+      `);
       const populatedPlacesStyle = new carto.style.CartoCSS(`
-        #layer {
-        marker-width: 8;
-        marker-fill: #FF583E;
-        marker-fill-opacity: 0.9;
-        marker-line-width: 0.5;
-        marker-line-color: #FFFFFF;
-        marker-line-opacity: 1;
-        marker-type: ellipse;
-        marker-allow-overlap: false;
-        }
-    `);
+          #layer {
+          marker-width: 8;
+          marker-fill: #FF583E;
+          marker-fill-opacity: 0.9;
+          marker-line-width: 0.5;
+          marker-line-color: #FFFFFF;
+          marker-line-opacity: 1;
+          marker-type: ellipse;
+          marker-allow-overlap: false;
+          }
+      `);
       const populatedPlaces = new carto.layer.Layer(
         populatedPlacesSource,
         populatedPlacesStyle,
@@ -123,6 +128,7 @@
       });
       return averagePopulation;
     }
+
     function getCountriesDataview() {
       function highlightCountry(admin) {
         let cartoCSS = `
@@ -194,11 +200,11 @@
   </script>
 </head>
 
-<body>
+<body style="background-color: #EEE">
   <!-- basic component -->
   <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
 
-  <h1>Some fancy CARTO-Web Components</h1>
+  <h1>Fancy "carto-layers" Web Component</h1>
 
   <div id="map"></div>
 
@@ -221,9 +227,16 @@
     // console.log(layers);
     client.addLayers(layers);
 
-    // 
+    // Starting to work with Components
     const cartoLayers = document.querySelector('carto-layers#cdb');
     cartoLayers.layers = layers;
+
+    cartoLayers.addEventListener('layerSelectionChanged', (event) => {
+      const { layer, selected } = event.detail;
+      const msg = `Layer: '${layer.getLayerName()}' is ${!selected ? 'NOT' : ''} selected`;
+      console.log(msg);
+    });
+    // window.setTimeout(() => { cartoLayers.layers = [] }, 4000);
 
   </script>
 
