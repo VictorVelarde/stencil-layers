@@ -7,9 +7,8 @@ import { Event, EventEmitter } from "@stencil/core";
   shadow: true
 })
 export class CartoLayers {
-  @Prop() layers: Array<any> = [];
   @Prop() componentTitle: string = `Layer selector`;
-  @Prop() getLayerName: string;
+  @Prop() layers: Array<any> = [];
 
   @Event() layerSelectionChanged: EventEmitter;
 
@@ -33,7 +32,7 @@ export class CartoLayers {
           type="checkbox"
           onClick={event => this.handleLayerSelection(event, layer)}
         />
-        <label>{layer[this.getLayerName]()}</label>
+        <label>{layer.getLayerName()}</label>
       </li>
     ));
     return <ul>{layers}</ul>;

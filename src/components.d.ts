@@ -27,6 +27,79 @@ declare global {
 declare global {
 
   namespace StencilComponents {
+    interface CartoLayers {
+      'componentTitle': string;
+      'layers': Array<any>;
+    }
+  }
+
+  interface HTMLCartoLayersElement extends StencilComponents.CartoLayers, HTMLStencilElement {}
+
+  var HTMLCartoLayersElement: {
+    prototype: HTMLCartoLayersElement;
+    new (): HTMLCartoLayersElement;
+  };
+  interface HTMLElementTagNameMap {
+    'carto-layers': HTMLCartoLayersElement;
+  }
+  interface ElementTagNameMap {
+    'carto-layers': HTMLCartoLayersElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      'carto-layers': JSXElements.CartoLayersAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface CartoLayersAttributes extends HTMLAttributes {
+      'componentTitle'?: string;
+      'layers'?: Array<any>;
+      'onLayerSelectionChanged'?: (event: CustomEvent) => void;
+    }
+  }
+}
+
+
+declare global {
+
+  namespace StencilComponents {
+    interface CategoryWidget {
+      'categories': any;
+      'maximum': number;
+      'selectCategory': () => void;
+    }
+  }
+
+  interface HTMLCategoryWidgetElement extends StencilComponents.CategoryWidget, HTMLStencilElement {}
+
+  var HTMLCategoryWidgetElement: {
+    prototype: HTMLCategoryWidgetElement;
+    new (): HTMLCategoryWidgetElement;
+  };
+  interface HTMLElementTagNameMap {
+    'category-widget': HTMLCategoryWidgetElement;
+  }
+  interface ElementTagNameMap {
+    'category-widget': HTMLCategoryWidgetElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      'category-widget': JSXElements.CategoryWidgetAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface CategoryWidgetAttributes extends HTMLAttributes {
+      'categories'?: any;
+      'maximum'?: number;
+      'onCategorySelected'?: (event: CustomEvent) => void;
+    }
+  }
+}
+
+
+declare global {
+
+  namespace StencilComponents {
     interface MyComponent {
       'first': string;
       'last': string;

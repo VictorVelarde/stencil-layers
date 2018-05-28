@@ -208,7 +208,9 @@
 
   <div id="map"></div>
 
-  <carto-layers id="cdb" get-layer-name="getLayerName"></carto-layers>
+  <carto-layers id="cdb"></carto-layers>
+
+  <category-widget maximum="100" categories='[{ "name": "Khaki", "value": 0 }, { "name": "Pear", "value": 25 }, { "name": "Orange", "value": 50}, { "name": "Apple", "value": 100}]'></category-widget>
 
   <script>
     const map = getBaseMap();
@@ -218,8 +220,8 @@
     const populatedPlaces = getPopulatedPlacesLayer();
 
     var client = new carto.Client({
-      apiKey: 'default_public',
-      username: 'victor-carto'
+      apiKey: ' default_public ',
+      username: 'victor-carto '
     });
 
     // Add Layers to map
@@ -228,12 +230,12 @@
     client.addLayers(layers);
 
     // Starting to work with Components
-    const cartoLayers = document.querySelector('carto-layers#cdb');
+    const cartoLayers = document.querySelector('carto-layers#cdb ');
     cartoLayers.layers = layers;
 
-    cartoLayers.addEventListener('layerSelectionChanged', (event) => {
+    cartoLayers.addEventListener('layerSelectionChanged ', (event) => {
       const { layer, selected } = event.detail;
-      const msg = `Layer: '${layer.getLayerName()}' is ${!selected ? 'NOT' : ''} selected`;
+      const msg = `Layer: '${layer.getLayerName()} ' is ${!selected ? 'NOT ' : ' '} selected`;
       console.log(msg);
     });
     // window.setTimeout(() => { cartoLayers.layers = [] }, 4000);
