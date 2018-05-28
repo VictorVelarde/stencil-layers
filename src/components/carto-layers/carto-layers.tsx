@@ -7,22 +7,18 @@ import { Event, EventEmitter } from "@stencil/core";
   shadow: true
 })
 export class CartoLayers {
-  @Prop() componentTitle: string = `Layer selector`;
-  @Prop() layers: Array<any> = [];
+  @Prop() title: string = "Title";
+  @Prop() subtitle: string = "Subtitle";
 
+  @Prop() layers: Array<any> = [];
   @Event() layerSelectionChanged: EventEmitter;
 
   render() {
     return (
-      <div class="carto-layers-content">
-        <div class="carto-layers-header">{this.renderHeader()}</div>
+      <carto-card title={this.title} subtitle={this.subtitle}>
         <div class="carto-layers-list">{this.renderLayerList()}</div>
-      </div>
+      </carto-card>
     );
-  }
-
-  renderHeader() {
-    return <div>{this.componentTitle}</div>;
   }
 
   renderLayerList() {
@@ -41,25 +37,5 @@ export class CartoLayers {
   handleLayerSelection(event, layer) {
     var selected = event.target.checked;
     this.layerSelectionChanged.emit({ layer, selected });
-  }
-
-  componentWillLoad() {
-    console.log(`will load with these layers: `, this.layers);
-  }
-
-  componentDidLoad() {
-    console.log("did load");
-  }
-
-  componentWillUpdate() {
-    console.log("will upcdate");
-  }
-
-  componentDidUpdate() {
-    console.log("did update");
-  }
-
-  componentDidUnload() {
-    console.log("was unloaded");
   }
 }

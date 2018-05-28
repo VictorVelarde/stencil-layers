@@ -12,10 +12,11 @@ import {
   styleUrl: "category-widget.css"
 })
 export class CategoryWidget {
+  @Prop() title: string = "Title";
+  @Prop() subtitle: string = "Subtitle";
+
   @Prop() categories: any;
   @Prop() maximum: number;
-  @Prop() title: string = "Categories";
-  @Prop() subtitle: string = "A widget for categories";
 
   @State() allCategories: Array<any> = [];
   @State() selectedCategories: Array<any> = [];
@@ -24,9 +25,6 @@ export class CategoryWidget {
   refreshCategories(newCategories) {
     if (!newCategories) return;
 
-    // this.allCategories = JSON.parse(newCategories).sort((catA, catB) => {
-    //   return catA.value < catB.value;
-    // });
     this.allCategories = newCategories.sort((catA, catB) => {
       return catA.value < catB.value;
     });
@@ -36,12 +34,9 @@ export class CategoryWidget {
 
   render() {
     return (
-      <div class="carto-card">
-        <h1 class="carto-card-header">{this.title}</h1>
-        <p>{this.subtitle}</p>
-
+      <carto-card title={this.title} subtitle={this.subtitle}>
         <div class="categories">{this.renderCategories()}</div>
-      </div>
+      </carto-card>
     );
   }
 
@@ -88,6 +83,7 @@ export class CategoryWidget {
     } else {
       this.selectedCategories = this.selectCategory(category);
     }
+
     this.categorySelected.emit({
       selected: this.selectedCategories,
       all: this.allCategories

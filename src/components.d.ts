@@ -27,9 +27,45 @@ declare global {
 declare global {
 
   namespace StencilComponents {
+    interface CartoCard {
+      'subtitle': string;
+      'title': string;
+    }
+  }
+
+  interface HTMLCartoCardElement extends StencilComponents.CartoCard, HTMLStencilElement {}
+
+  var HTMLCartoCardElement: {
+    prototype: HTMLCartoCardElement;
+    new (): HTMLCartoCardElement;
+  };
+  interface HTMLElementTagNameMap {
+    'carto-card': HTMLCartoCardElement;
+  }
+  interface ElementTagNameMap {
+    'carto-card': HTMLCartoCardElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      'carto-card': JSXElements.CartoCardAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface CartoCardAttributes extends HTMLAttributes {
+      'subtitle'?: string;
+      'title'?: string;
+    }
+  }
+}
+
+
+declare global {
+
+  namespace StencilComponents {
     interface CartoLayers {
-      'componentTitle': string;
       'layers': Array<any>;
+      'subtitle': string;
+      'title': string;
     }
   }
 
@@ -52,9 +88,10 @@ declare global {
   }
   namespace JSXElements {
     export interface CartoLayersAttributes extends HTMLAttributes {
-      'componentTitle'?: string;
       'layers'?: Array<any>;
       'onLayerSelectionChanged'?: (event: CustomEvent) => void;
+      'subtitle'?: string;
+      'title'?: string;
     }
   }
 }

@@ -1,17 +1,3 @@
-.carto-card {
-  border: 2px #ccc solid;
-  box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  width: 350px;
-  background-color: white;
-  font-family: Roboto, Helvetica, Arial, "sans-serif";
-}
-.carto-card-header {
-  color: #2c2c2c;
-  font-weight: 400;
-  font-size: 24px;
-}
-
 .categories {
   list-style-type: none;
   padding: 0;
