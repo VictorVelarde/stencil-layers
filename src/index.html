@@ -19,8 +19,6 @@
   <!-- Components -->
   <script src="/build/carto-components.js"></script>
 
-
-
   <!-- Some CARTO.JS useful stuff -->
   <script>
     function getBaseMap() {
@@ -201,17 +199,19 @@
 </head>
 
 <body style="background-color: #EEE">
-  <!-- basic component -->
+  <!-- basic component 
   <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
+  -->
 
-  <h1>Fancy "carto-layers" Web Component</h1>
+  <h1>Fancy "carto-web-components"</h1>
 
   <div id="map"></div>
 
-  <carto-layers id="cdb"></carto-layers>
+  <carto-layers></carto-layers>
 
   <br/>
-  <category-widget maximum="100" categories='[{ "name": "Khaki", "value": 0 }, { "name": "Pear", "value": 25 }, { "name": "Orange", "value": 50}, { "name": "Apple", "value": 100}]'></category-widget>
+
+  <category-widget title="My Categories" maximum="100"></category-widget>
 
   <script>
     const map = getBaseMap();
@@ -227,19 +227,28 @@
 
     // Add Layers to map
     var layers = [europeanCountries, populatedPlaces];
-    // console.log(layers);
     client.addLayers(layers);
 
     // Starting to work with Components
-    const cartoLayers = document.querySelector('carto-layers#cdb ');
+    const cartoLayers = document.querySelector('carto-layers');
     cartoLayers.layers = layers;
-
-    cartoLayers.addEventListener('layerSelectionChanged ', (event) => {
+    cartoLayers.addEventListener('layerSelectionChanged', (event) => {
       const { layer, selected } = event.detail;
-      const msg = `Layer: '${layer.getLayerName()} ' is ${!selected ? 'NOT ' : ' '} selected`;
+      const msg = `Layer: '${layer.getLayerName()}' is ${!selected ? 'NOT ' : ''} selected`;
       console.log(msg);
     });
-    // window.setTimeout(() => { cartoLayers.layers = [] }, 4000);
+
+    const category = document.querySelector('category-widget');
+    category.categories = [
+      { "name": "Khaki", "value": 5 },
+      { "name": "Pear", "value": 25 },
+      { "name": "Orange", "value": 50 },
+      { "name": "Apple", "value": 100 }
+    ];
+    category.addEventListener('categorySelected', (event) => {
+      console.log(event.detail);
+    });
+
 
   </script>
 

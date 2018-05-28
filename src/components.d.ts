@@ -66,6 +66,8 @@ declare global {
     interface CategoryWidget {
       'categories': any;
       'maximum': number;
+      'subtitle': string;
+      'title': string;
     }
   }
 
@@ -91,6 +93,8 @@ declare global {
       'categories'?: any;
       'maximum'?: number;
       'onCategorySelected'?: (event: CustomEvent) => void;
+      'subtitle'?: string;
+      'title'?: string;
     }
   }
 }

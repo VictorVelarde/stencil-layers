@@ -1,22 +1,44 @@
-import { Component, Prop, State, Event, EventEmitter } from "@stencil/core";
+import {
+  Component,
+  Prop,
+  State,
+  Event,
+  EventEmitter,
+  Watch
+} from "@stencil/core";
 
 @Component({
   tag: "category-widget",
   styleUrl: "category-widget.css"
 })
 export class CategoryWidget {
-  @Prop({ mutable: true })
-  categories: any;
-  @State() selectedCategories: Array<any> = [];
+  @Prop() categories: any;
   @Prop() maximum: number;
+  @Prop() title: string = "Categories";
+  @Prop() subtitle: string = "A widget for categories";
+
+  @State() allCategories: Array<any> = [];
+  @State() selectedCategories: Array<any> = [];
+
+  @Watch("categories")
+  refreshCategories(newCategories) {
+    if (!newCategories) return;
+
+    // this.allCategories = JSON.parse(newCategories).sort((catA, catB) => {
+    //   return catA.value < catB.value;
+    // });
+    this.allCategories = newCategories.sort((catA, catB) => {
+      return catA.value < catB.value;
+    });
+  }
 
   @Event() categorySelected: EventEmitter;
 
   render() {
     return (
       <div class="carto-card">
-        <h1 class="carto-card-header">Category Widget</h1>
-        <h2>All selected</h2>
+        <h1 class="carto-card-header">{this.title}</h1>
+        <p>{this.subtitle}</p>
 
         <div class="categories">{this.renderCategories()}</div>
       </div>
@@ -24,13 +46,11 @@ export class CategoryWidget {
   }
 
   componentWillLoad() {
-    this.categories = JSON.parse(this.categories).sort((catA, catB) => {
-      return catA.value < catB.value;
-    });
+    this.refreshCategories(this.categories);
   }
 
   renderCategories() {
-    const categories = this.categories.map(category => {
+    const categories = this.allCategories.map(category => {
       const categoryPercentage = category.value * 100.0 / this.maximum;
       const selected = this.isCategorySelected(category);
 
@@ -65,17 +85,23 @@ export class CategoryWidget {
   categoryClick(category) {
     if (this.isCategorySelected(category)) {
       this.selectedCategories = this.removeCategory(category);
-      return;
+    } else {
+      this.selectedCategories = this.selectCategory(category);
     }
-
-    this.selectedCategories = this.selectCategory(category);
+    this.categorySelected.emit({
+      selected: this.selectedCategories,
+      all: this.allCategories
+    });
   }
 
   selectCategory(category) {
+    category.selected = true;
+
     return [...this.selectedCategories, category];
   }
 
   removeCategory(categoryToRemove) {
+    categoryToRemove.selected = false;
     const allCategories = [...this.selectedCategories];
 
     return allCategories.filter(category => category !== categoryToRemove);
