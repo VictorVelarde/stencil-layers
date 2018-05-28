@@ -66,7 +66,6 @@ declare global {
     interface CategoryWidget {
       'categories': any;
       'maximum': number;
-      'selectCategory': () => void;
     }
   }
 
