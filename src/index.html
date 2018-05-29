@@ -2,7 +2,6 @@
 <html dir="ltr" lang="en">
 
 <head>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>CARTO-Stencil Component Starter</title>
@@ -20,7 +19,38 @@
   <!-- Components -->
   <script src="/build/carto-components.js"></script>
 
-  <!-- Some CARTO.JS useful stuff -->
+  <style>
+    #map {
+      width: 100vw;
+      height: 100vh;
+      max-width: 600px;
+    }
+  </style>
+</head>
+
+<body style="background-color: #EEE">
+
+  <!-- basic component 
+  <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
+  -->
+
+  <h1>Fancy "carto-web-components"</h1>
+
+  <div id="map"></div>
+
+  <!-- <carto-layers card-title="My carto-layers" card-subtitle="These are my layers..."></carto-layers> -->
+
+  <br/>
+
+  <category-widget id="countries-widget" card-title="My category-widget" card-subtitle="Clic to select countries"></category-widget>
+  <category-widget id="cities-widget" card-title="My category-widget" card-subtitle="Clic to select cities"></category-widget>
+
+  <!-- <carto-card class="my-custom-carto-card">
+    <h3 slot="title">MY new h3 title</h3>
+    <p slot="description">My description</p>
+    <category-widget slot="content" card-title="My category-widget" card-subtitle="Clic to select n categories" maximum="100"></category-widget>
+  </carto-card> -->
+
   <script>
     function getBaseMap() {
       const map = L.map("map").setView([50, 15], 4);
@@ -67,12 +97,12 @@
       return europeanCountries;
     }
 
+    const populatedPlacesSource = new carto.source.SQL(`
+        SELECT *
+        FROM ne_10m_populated_places_simple
+    `);
+
     function getPopulatedPlacesLayer() {
-      const populatedPlacesSource = new carto.source.SQL(`
-          SELECT *
-          FROM ne_10m_populated_places_simple
-          WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
-      `);
       const populatedPlacesStyle = new carto.style.CartoCSS(`
           #layer {
           marker-width: 8;
@@ -130,6 +160,8 @@
       return averagePopulation;
     }
 
+    let citiesDataview;
+
     function getCountriesDataview() {
       function highlightCountry(admin) {
         let cartoCSS = `
@@ -143,98 +175,41 @@
             }
         }
         `;
-        if (admin) {
-          cartoCSS = `
-            ${cartoCSS}
-            #layer[admin!='${admin}'] {
-            polygon-fill: #CDCDCD;
-            }
-        `;
-        }
+
         europeanCountries.getStyle().setContent(cartoCSS);
       }
 
-      function filterPopulatedPlacesByCountry(admin) {
-        let query = `
-        SELECT *
-            FROM ne_10m_populated_places_simple
-            WHERE adm0name IN (SELECT admin FROM ne_adm0_europe)
-        `;
-        if (admin) {
-          query = `
-            SELECT *
-            FROM ne_10m_populated_places_simple
-            WHERE adm0name='${admin}'
-        `;
-        }
+      function filterPopulatedPlacesByCountry() {
+        let query = `SELECT * FROM ne_10m_populated_places_simple`;
         populatedPlaces.getSource().setQuery(query);
       }
 
       const countriesDataview = new carto.dataview.Category(
-        europeanCountries.getSource(),
-        "admin",
-        {
-          limit: 100
-        }
+        populatedPlaces.getSource(),
+        "adm0name"
       );
+
+      const categoryWidget = document.querySelector('#countries-widget');
+
       countriesDataview.on("dataChanged", data => {
-        const countryNames = data.categories.map(category => category.name).sort();
-        const widgetDom = document.querySelector("#countriesWidget");
-        const countriesDom = widgetDom.querySelector(".js-countries");
-
-        countriesDom.onchange = event => {
-          const admin = event.target.value;
-          highlightCountry(admin);
-          filterPopulatedPlacesByCountry(admin);
-        };
-
-        // Fill in the list of countries
-        countryNames.forEach(admin => {
-          const option = document.createElement("option");
-          option.innerHTML = admin;
-          option.value = admin;
-          countriesDom.appendChild(option);
-        });
+        categoryWidget.categories = data.categories;
+        categoryWidget.maximum = data.max;
       });
+
+      citiesDataview = new carto.dataview.Category(
+        populatedPlaces.getSource(),
+        "name"
+      );
+      const citiesCategoryWidget = document.querySelector('#cities-widget');
+
+      citiesDataview.on("dataChanged", data => {
+        citiesCategoryWidget.categories = data.categories;
+        citiesCategoryWidget.maximum = data.max;
+      });
+
       return countriesDataview;
     }
-  </script>
 
-  <style>
-    category-widget .category-bar {
-      background-color: green;
-    }
-
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-</head>
-
-<body style="background-color: #EEE">
-
-  <!-- basic component 
-  <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
-  -->
-
-  <h1>Fancy "carto-web-components"</h1>
-
-  <div id="map"></div>
-
-  <carto-layers card-title="My carto-layers" card-subtitle="These are my layers..."></carto-layers>
-
-  <br/>
-
-  <category-widget card-title="My category-widget" card-subtitle="Clic to select n categories" maximum="100"></category-widget>
-
-  <carto-card class="my-custom-carto-card">
-    <h3 slot="title">MY new h3 title</h3>
-    <p slot="description">My description</p>
-    <category-widget slot="content" card-title="My category-widget" card-subtitle="Clic to select n categories" maximum="100"></category-widget>
-  </carto-card>
-
-  <script>
     const map = getBaseMap();
     const popup = L.popup({ closeButton: false });
 
@@ -243,42 +218,93 @@
 
     var client = new carto.Client({
       apiKey: 'default_public',
-      username: 'victor-carto'
+      username: 'common-data'
     });
 
     // Add Layers to map
     var layers = [europeanCountries, populatedPlaces];
     client.addLayers(layers);
+    client.getLeafletLayer().addTo(map);
+
+    client.addDataview(getCountriesDataview());
+    client.addDataview(citiesDataview);
 
     // Starting to work with Components
-    const cartoLayers = document.querySelector('carto-layers');
-    cartoLayers.layers = layers;
-    cartoLayers.addEventListener('layerSelectionChanged', function (event) {
-      const layer = event.detail.layer;
-      const selected = event.detail.selected;
-      const msg = 'Layer: ' + layer.getLayerName() + 'is' + !selected ? 'NOT ' : '' + 'selected';
-      console.log(msg);
+    // const cartoLayers = document.querySelector('carto-layers');
+    // cartoLayers.layers = layers;
+    // cartoLayers.addEventListener('layerSelectionChanged', function (event) {
+    //   const layer = event.detail.layer;
+    //   const selected = event.detail.selected;
+    //   const msg = 'Layer: ' + layer.getLayerName() + 'is' + !selected ? 'NOT ' : '' + 'selected';
+    //   console.log(msg);
+    // });
+
+    // const category = document.querySelector('category-widget');
+    // category.categories = [
+    //   { "name": "Khaki", "value": 5 },
+    //   { "name": "Pear", "value": 25 },
+    //   { "name": "Orange", "value": 50 },
+    //   { "name": "Apple", "value": 100 }
+    // ];
+    // category.addEventListener('categorySelected', function (event) {
+    //   console.log(event.detail);
+    // });
+
+    // const nestedCategory = document.querySelector('carto-card category-widget');
+    // nestedCategory.categories = [
+    //   { "name": "Khakissssss", "value": 5 },
+    //   { "name": "Pear", "value": 25 },
+    //   { "name": "Orange", "value": 50 },
+    //   { "name": "Apple", "value": 100 }
+    // ];
+
+    let selectedCountries = [];
+    let timeout;
+
+    function applyCountriesFilter(selectedCategories) {
+      console.log('applyCountriesFilter', selectedCategories);
+      const cond = selectedCategories
+        .map(e => `adm0name='${e.name}'`)
+        .join(' or ')
+
+      if (!cond) return;
+
+      populatedPlacesSource.setQuery(`
+        SELECT *
+        FROM ne_10m_populated_places_simple
+        WHERE ${cond}
+      `);
+    }
+
+    const countriesWidget = document.querySelector('#countries-widget');
+    countriesWidget.addEventListener('categorySelected', function (event) {
+      var categoriesSelected = event.detail.selected;
+      selectedCountries = categoriesSelected;
+
+      if (!timeout) {
+        timeout = setTimeout(function () {
+          applyCountriesFilter(selectedCountries);
+          timeout = null;
+        }, 3000);
+      }
     });
 
-    const category = document.querySelector('category-widget');
-    category.categories = [
-      { "name": "Khaki", "value": 5 },
-      { "name": "Pear", "value": 25 },
-      { "name": "Orange", "value": 50 },
-      { "name": "Apple", "value": 100 }
-    ];
-    category.addEventListener('categorySelected', function (event) {
-      console.log(event.detail);
+    const citiesWidget = document.querySelector('#cities-widget');
+    citiesWidget.addEventListener('categorySelected', function (event) {
+      var categoriesSelected = event.detail.selected;
+
+      const cond = categoriesSelected
+        .map(e => `name='${e.name}'`)
+        .join(' or ')
+
+      if (!cond) return;
+
+      populatedPlacesSource.setQuery(`
+        SELECT *
+        FROM ne_10m_populated_places_simple
+        WHERE ${cond}
+      `);
     });
-
-    const nestedCategory = document.querySelector('carto-card category-widget');
-    nestedCategory.categories = [
-      { "name": "Khakissssss", "value": 5 },
-      { "name": "Pear", "value": 25 },
-      { "name": "Orange", "value": 50 },
-      { "name": "Apple", "value": 100 }
-    ];
-
   </script>
 
 </body>
