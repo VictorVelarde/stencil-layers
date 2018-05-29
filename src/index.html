@@ -2,6 +2,7 @@
 <html dir="ltr" lang="en">
 
 <head>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>CARTO-Stencil Component Starter</title>
@@ -61,7 +62,7 @@
         europeanCountriesStyle
       );
 
-      europeanCountries.getLayerName = () => "European Countries (dataset)";
+      europeanCountries.getLayerName = function () { return "European Countries (dataset)" };
 
       return europeanCountries;
     }
@@ -92,18 +93,20 @@
         }
       );
 
-      populatedPlaces.on(carto.layer.events.FEATURE_OVER, featureEvent => {
+      populatedPlaces.on(carto.layer.events.FEATURE_OVER, function (featureEvent) {
         popup.setLatLng(featureEvent.latLng);
         if (!popup.isOpen()) {
           popup.setContent(featureEvent.data.name);
           popup.openOn(map);
         }
       });
-      populatedPlaces.on(carto.layer.events.FEATURE_OUT, featureEvent => {
+      populatedPlaces.on(carto.layer.events.FEATURE_OUT, function (featureEvent) {
         popup.removeFrom(map);
       });
 
-      populatedPlaces.getLayerName = () => "Populated places (Query)";
+      populatedPlaces.getLayerName = function () {
+        return "Populated places (Query)"
+      };
 
       return populatedPlaces;
     }
@@ -196,6 +199,17 @@
       return countriesDataview;
     }
   </script>
+
+  <style>
+    category-widget .category-bar {
+      background-color: green;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 
 <body style="background-color: #EEE">
@@ -208,11 +222,17 @@
 
   <div id="map"></div>
 
-  <carto-layers title="My carto-layers" subtitle="These are my layers..."></carto-layers>
+  <carto-layers card-title="My carto-layers" card-subtitle="These are my layers..."></carto-layers>
 
   <br/>
 
-  <category-widget title="My category-widget" subtitle="Clic to select n categories" maximum="100"></category-widget>
+  <category-widget card-title="My category-widget" card-subtitle="Clic to select n categories" maximum="100"></category-widget>
+
+  <carto-card class="my-custom-carto-card">
+    <h3 slot="title">MY new h3 title</h3>
+    <p slot="description">My description</p>
+    <category-widget slot="content" card-title="My category-widget" card-subtitle="Clic to select n categories" maximum="100"></category-widget>
+  </carto-card>
 
   <script>
     const map = getBaseMap();
@@ -222,8 +242,8 @@
     const populatedPlaces = getPopulatedPlacesLayer();
 
     var client = new carto.Client({
-      apiKey: ' default_public ',
-      username: 'victor-carto '
+      apiKey: 'default_public',
+      username: 'victor-carto'
     });
 
     // Add Layers to map
@@ -233,9 +253,10 @@
     // Starting to work with Components
     const cartoLayers = document.querySelector('carto-layers');
     cartoLayers.layers = layers;
-    cartoLayers.addEventListener('layerSelectionChanged', (event) => {
-      const { layer, selected } = event.detail;
-      const msg = `Layer: '${layer.getLayerName()}' is ${!selected ? 'NOT ' : ''} selected`;
+    cartoLayers.addEventListener('layerSelectionChanged', function (event) {
+      const layer = event.detail.layer;
+      const selected = event.detail.selected;
+      const msg = 'Layer: ' + layer.getLayerName() + 'is' + !selected ? 'NOT ' : '' + 'selected';
       console.log(msg);
     });
 
@@ -246,10 +267,17 @@
       { "name": "Orange", "value": 50 },
       { "name": "Apple", "value": 100 }
     ];
-    category.addEventListener('categorySelected', (event) => {
+    category.addEventListener('categorySelected', function (event) {
       console.log(event.detail);
     });
 
+    const nestedCategory = document.querySelector('carto-card category-widget');
+    nestedCategory.categories = [
+      { "name": "Khakissssss", "value": 5 },
+      { "name": "Pear", "value": 25 },
+      { "name": "Orange", "value": 50 },
+      { "name": "Apple", "value": 100 }
+    ];
 
   </script>
 

@@ -28,8 +28,8 @@ declare global {
 
   namespace StencilComponents {
     interface CartoCard {
-      'subtitle': string;
-      'title': string;
+      'cardSubtitle': string;
+      'cardTitle': string;
     }
   }
 
@@ -52,8 +52,8 @@ declare global {
   }
   namespace JSXElements {
     export interface CartoCardAttributes extends HTMLAttributes {
-      'subtitle'?: string;
-      'title'?: string;
+      'cardSubtitle'?: string;
+      'cardTitle'?: string;
     }
   }
 }
@@ -63,9 +63,9 @@ declare global {
 
   namespace StencilComponents {
     interface CartoLayers {
+      'cardSubtitle': string;
+      'cardTitle': string;
       'layers': Array<any>;
-      'subtitle': string;
-      'title': string;
     }
   }
 
@@ -88,10 +88,10 @@ declare global {
   }
   namespace JSXElements {
     export interface CartoLayersAttributes extends HTMLAttributes {
+      'cardSubtitle'?: string;
+      'cardTitle'?: string;
       'layers'?: Array<any>;
       'onLayerSelectionChanged'?: (event: CustomEvent) => void;
-      'subtitle'?: string;
-      'title'?: string;
     }
   }
 }
@@ -101,10 +101,10 @@ declare global {
 
   namespace StencilComponents {
     interface CategoryWidget {
+      'cardSubtitle': string;
+      'cardTitle': string;
       'categories': any;
       'maximum': number;
-      'subtitle': string;
-      'title': string;
     }
   }
 
@@ -127,11 +127,11 @@ declare global {
   }
   namespace JSXElements {
     export interface CategoryWidgetAttributes extends HTMLAttributes {
+      'cardSubtitle'?: string;
+      'cardTitle'?: string;
       'categories'?: any;
       'maximum'?: number;
       'onCategorySelected'?: (event: CustomEvent) => void;
-      'subtitle'?: string;
-      'title'?: string;
     }
   }
 }

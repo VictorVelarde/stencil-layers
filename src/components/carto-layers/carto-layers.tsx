@@ -7,16 +7,22 @@ import { Event, EventEmitter } from "@stencil/core";
   shadow: true
 })
 export class CartoLayers {
-  @Prop() title: string = "Title";
-  @Prop() subtitle: string = "Subtitle";
+  @Prop() cardTitle: string = "Title";
+  @Prop() cardSubtitle: string = "Subtitle";
 
   @Prop() layers: Array<any> = [];
   @Event() layerSelectionChanged: EventEmitter;
 
   render() {
     return (
-      <carto-card title={this.title} subtitle={this.subtitle}>
-        <div class="carto-layers-list">{this.renderLayerList()}</div>
+      <carto-card>
+        <h1 class="carto-card-header" slot="title">
+          {this.cardTitle}
+        </h1>
+        <p slot="description">{this.cardSubtitle}</p>
+        <div slot="content" class="carto-layers-list">
+          {this.renderLayerList()}
+        </div>
       </carto-card>
     );
   }

@@ -1,3 +1,9 @@
+:root {
+  --primary-text-color: blue;
+}
+
+/* #2c2c2c; */
+
 .carto-card {
   border: 2px #ccc solid;
   box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2);
@@ -8,7 +14,7 @@
 }
 
 .carto-card-header {
-  color: #2c2c2c;
+  color: var(--primary-text-color);
   font-weight: 400;
   font-size: 24px;
 }

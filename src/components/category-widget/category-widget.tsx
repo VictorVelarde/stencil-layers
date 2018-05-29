@@ -12,8 +12,8 @@ import {
   styleUrl: "category-widget.css"
 })
 export class CategoryWidget {
-  @Prop() title: string = "Title";
-  @Prop() subtitle: string = "Subtitle";
+  @Prop() cardTitle: string = "Title";
+  @Prop() cardSubtitle: string = "Subtitle";
 
   @Prop() categories: any;
   @Prop() maximum: number;
@@ -34,8 +34,12 @@ export class CategoryWidget {
 
   render() {
     return (
-      <carto-card title={this.title} subtitle={this.subtitle}>
-        <div class="categories">{this.renderCategories()}</div>
+      <carto-card>
+        <h4 slot="title">{this.cardTitle}</h4>
+        <span slot="description">{this.cardSubtitle}</span>
+        <div slot="content" class="categories">
+          {this.renderCategories()}
+        </div>
       </carto-card>
     );
   }

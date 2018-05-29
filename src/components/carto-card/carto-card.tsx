@@ -6,15 +6,15 @@ import { Component, Prop } from "@stencil/core";
   shadow: false
 })
 export class CartoCard {
-  @Prop() title: string = "Card";
-  @Prop() subtitle: string = "Card Subtitle";
+  @Prop() cardTitle: string = "Card";
+  @Prop() cardSubtitle: string = "Card Subtitle";
 
   render() {
     return (
       <div class="carto-card">
-        <h1 class="carto-card-header">{this.title}</h1>
-        <p>{this.subtitle}</p>
-        <slot>{/* Card Content */}</slot>
+        <slot name="title" />
+        <slot name="description" />
+        <slot name="content">{/* Card Content */}</slot>
       </div>
     );
   }
