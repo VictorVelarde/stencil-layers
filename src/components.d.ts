@@ -131,7 +131,9 @@ declare global {
       'cardTitle'?: string;
       'categories'?: any;
       'maximum'?: number;
+      'onApplyFilters'?: (event: CustomEvent) => void;
       'onCategorySelected'?: (event: CustomEvent) => void;
+      'onClearFilters'?: (event: CustomEvent) => void;
     }
   }
 }

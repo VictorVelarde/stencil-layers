@@ -20,6 +20,11 @@ export class CategoryWidget {
 
   @State() allCategories: Array<any> = [];
   @State() selectedCategories: Array<any> = [];
+  @State() isFiltered: boolean = false;
+
+  @Event() categorySelected: EventEmitter;
+  @Event() applyFilters: EventEmitter;
+  @Event() clearFilters: EventEmitter;
 
   @Watch("categories")
   refreshCategories(newCategories) {
@@ -30,7 +35,6 @@ export class CategoryWidget {
     });
   }
 
-  @Event() categorySelected: EventEmitter;
 
   render() {
     return (
@@ -38,6 +42,9 @@ export class CategoryWidget {
         <h4 slot="title">{this.cardTitle}</h4>
         <span slot="description">{this.cardSubtitle}</span>
         <div slot="content" class="categories">
+          <button onClick={() => this.isFiltered ? this.emitClearFilters() : this.emitApplyFilters()}>
+            { this.isFiltered ? 'Clear filters' : 'Apply filters' }
+          </button>
           {this.renderCategories()}
         </div>
       </carto-card>
@@ -54,27 +61,36 @@ export class CategoryWidget {
       const selected = this.isCategorySelected(category);
 
       return (
-        <li class="category" onClick={() => this.categoryClick(category)}>
+        <li
+          class={'category' + (category.group ? ' disabled' : '')}
+          onClick={() => this.categoryClick(category)}>
           <label>
             <span>{category.name}</span>
             <div class="category-value">{category.value}</div>
           </label>
 
           <div class="category-bar">
-            {selected ? (
+            { !category.group ?
               <div
-                class="category-progress"
+                class={'category-progress' + (selected ? ' category-progress--selected' : '')}
                 style={{ width: `${categoryPercentage}%` }}
-              />
-            ) : (
-              ""
-            )}
+              /> : '' }
           </div>
         </li>
       );
     });
 
     return <ul class="categories">{categories}</ul>;
+  }
+
+  emitApplyFilters() {
+    this.isFiltered = true;
+    this.applyFilters.emit({ selected: this.selectedCategories });
+  }
+
+  emitClearFilters() {
+    this.isFiltered = false;
+    this.clearFilters.emit();
   }
 
   isCategorySelected(category) {

@@ -30,7 +30,7 @@
 
 <body style="background-color: #EEE">
 
-  <!-- basic component 
+  <!-- basic component
   <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component>
   -->
 
@@ -42,8 +42,8 @@
 
   <br/>
 
-  <category-widget id="countries-widget" card-title="My category-widget" card-subtitle="Clic to select countries"></category-widget>
-  <category-widget id="cities-widget" card-title="My category-widget" card-subtitle="Clic to select cities"></category-widget>
+  <category-widget id="countries-widget" card-title="Countries" card-subtitle="Click to select countries"></category-widget>
+  <category-widget id="cities-widget" card-title="Cities" card-subtitle="Click to select cities"></category-widget>
 
   <!-- <carto-card class="my-custom-carto-card">
     <h3 slot="title">MY new h3 title</h3>
@@ -190,10 +190,20 @@
       );
 
       const categoryWidget = document.querySelector('#countries-widget');
+      categoryWidget.addEventListener('applyFilters', function (event) {
+        filters.adm0name.values = event.detail.selected;
+        applyFilter(populatedPlacesSource, filters);
+      });
+
+      categoryWidget.addEventListener('clearFilters', function () {
+        filters.adm0name.values = [];
+        applyFilter(populatedPlacesSource, filters);
+      });
 
       countriesDataview.on("dataChanged", data => {
-        categoryWidget.categories = data.categories;
+        debugger;
         categoryWidget.maximum = data.max;
+        categoryWidget.categories = data.categories;
       });
 
       citiesDataview = new carto.dataview.Category(
@@ -201,10 +211,19 @@
         "name"
       );
       const citiesCategoryWidget = document.querySelector('#cities-widget');
+      citiesCategoryWidget.addEventListener('applyFilters', function (event) {
+        filters.name.values = event.detail.selected;
+        applyFilter(populatedPlacesSource, filters);
+      });
+
+      citiesCategoryWidget.addEventListener('clearFilters', function () {
+        filters.name.values = [];
+        applyFilter(populatedPlacesSource, filters);
+      });
 
       citiesDataview.on("dataChanged", data => {
-        citiesCategoryWidget.categories = data.categories;
         citiesCategoryWidget.maximum = data.max;
+        citiesCategoryWidget.categories = data.categories;
       });
 
       return countriesDataview;
@@ -212,6 +231,11 @@
 
     const map = getBaseMap();
     const popup = L.popup({ closeButton: false });
+
+    const filters = {
+      adm0name: { columnName: 'adm0name', values: [ /* countries */ ] },
+      name: { columnName: 'name', values: [ /* cities */ ] }
+    };
 
     const europeanCountries = getEuropeanCountriesLayer();
     const populatedPlaces = getPopulatedPlacesLayer();
@@ -258,53 +282,26 @@
     //   { "name": "Apple", "value": 100 }
     // ];
 
-    let selectedCountries = [];
-    let timeout;
-
-    function applyCountriesFilter(selectedCategories) {
-      console.log('applyCountriesFilter', selectedCategories);
-      const cond = selectedCategories
-        .map(e => `adm0name='${e.name}'`)
+    function applyFilter(source, filters, tableName = 'ne_10m_populated_places_simple') {
+      let whereQuery = Object.values(filters)
+      .filter(e => e.values.length)
+      .map(filter => {
+        return filter.values
+        .map(e => `${filter.columnName}='${e.name}'`)
         .join(' or ')
+      })
+      .join(') AND (');
 
-      if (!cond) return;
+      if (whereQuery) {
+        whereQuery = `(${whereQuery})`;
+      }
 
-      populatedPlacesSource.setQuery(`
+      source.setQuery(`
         SELECT *
-        FROM ne_10m_populated_places_simple
-        WHERE ${cond}
+        FROM ${tableName}
+        ${whereQuery ? 'WHERE ' + whereQuery : ''}
       `);
     }
-
-    const countriesWidget = document.querySelector('#countries-widget');
-    countriesWidget.addEventListener('categorySelected', function (event) {
-      var categoriesSelected = event.detail.selected;
-      selectedCountries = categoriesSelected;
-
-      if (!timeout) {
-        timeout = setTimeout(function () {
-          applyCountriesFilter(selectedCountries);
-          timeout = null;
-        }, 3000);
-      }
-    });
-
-    const citiesWidget = document.querySelector('#cities-widget');
-    citiesWidget.addEventListener('categorySelected', function (event) {
-      var categoriesSelected = event.detail.selected;
-
-      const cond = categoriesSelected
-        .map(e => `name='${e.name}'`)
-        .join(' or ')
-
-      if (!cond) return;
-
-      populatedPlacesSource.setQuery(`
-        SELECT *
-        FROM ne_10m_populated_places_simple
-        WHERE ${cond}
-      `);
-    });
   </script>
 
 </body>
