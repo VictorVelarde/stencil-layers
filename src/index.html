@@ -20,10 +20,15 @@
   <script src="/build/carto-components.js"></script>
 
   <style>
+    #myApp {
+      display: flex;
+      align-items: center;
+    }
+
     #map {
       width: 100vw;
       height: 100vh;
-      max-width: 600px;
+      max-width: 800px;
     }
   </style>
 </head>
@@ -36,15 +41,14 @@
 
   <h1>Fancy "carto-web-components"</h1>
 
-  <div id="map"></div>
-
-  <!-- <carto-layers card-title="My carto-layers" card-subtitle="These are my layers..."></carto-layers> -->
-
-  <br/>
-
-  <category-widget id="countries-widget" card-title="Countries" card-subtitle="Click to select countries"></category-widget>
-  <category-widget id="cities-widget" card-title="Cities" card-subtitle="Click to select cities"></category-widget>
-
+  <div id="myApp">
+    <div id="map"></div>
+    <!-- <carto-layers card-title="My carto-layers" card-subtitle="These are my layers..."></carto-layers> -->
+    <div id="panel">
+      <category-widget id="countries-widget" card-title="Countries" card-subtitle="Click to select countries"></category-widget>
+      <category-widget id="cities-widget" card-title="Cities" card-subtitle="Click to select cities"></category-widget>
+    </div>
+  </div>
   <!-- <carto-card class="my-custom-carto-card">
     <h3 slot="title">MY new h3 title</h3>
     <p slot="description">My description</p>
@@ -233,8 +237,8 @@
     const popup = L.popup({ closeButton: false });
 
     const filters = {
-      adm0name: { columnName: 'adm0name', values: [ /* countries */ ] },
-      name: { columnName: 'name', values: [ /* cities */ ] }
+      adm0name: { columnName: 'adm0name', values: [ /* countries */] },
+      name: { columnName: 'name', values: [ /* cities */] }
     };
 
     const europeanCountries = getEuropeanCountriesLayer();
@@ -284,13 +288,13 @@
 
     function applyFilter(source, filters, tableName = 'ne_10m_populated_places_simple') {
       let whereQuery = Object.values(filters)
-      .filter(e => e.values.length)
-      .map(filter => {
-        return filter.values
-        .map(e => `${filter.columnName}='${e.name}'`)
-        .join(' or ')
-      })
-      .join(') AND (');
+        .filter(e => e.values.length)
+        .map(filter => {
+          return filter.values
+            .map(e => `${filter.columnName}='${e.name}'`)
+            .join(' or ')
+        })
+        .join(') AND (');
 
       if (whereQuery) {
         whereQuery = `(${whereQuery})`;
